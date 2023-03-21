@@ -1,6 +1,6 @@
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "mcset.open-cluster-management.io"
+  name: "mcsetbinding.open-cluster-management.io"
 spec:
   failurePolicy: Fail
   matchConstraints:
@@ -18,8 +18,8 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1alpha1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: "mcset-binding"
+  name: "mcsetbinding-binding"
 spec:
-  policyName: "mcset.open-cluster-management.io"
+  policyName: "mcsetbinding.open-cluster-management.io"
   validationActions:
     - Deny
