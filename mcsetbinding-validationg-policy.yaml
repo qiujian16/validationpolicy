@@ -1,0 +1,25 @@
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "mcset.open-cluster-management.io"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   ["cluster.open-cluster-management.io"]
+      apiVersions: ["v1beta2"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["managedclustersetbindings"]
+  validations:
+    - expression: "authorizer.group('cluster.open-cluster-management.io').resource('managedclustersets').name(object.spec.clusterSet).subresource('bind').check('create').allowed()"
+      message: "missing bind permission"
+
+---
+
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: "mcset-binding"
+spec:
+  policyName: "mcset.open-cluster-management.io"
+  validationActions:
+    - Deny
