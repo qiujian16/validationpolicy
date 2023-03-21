@@ -1,0 +1,32 @@
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "mc-policy.open-cluster-management.io"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   ["cluster.open-cluster-management.io"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["managedclusters"]
+  matchConditions:
+    - name: "accept-hub"
+      expression: "object.spec.hubAcceptsClient==true"
+    - name: "old-accept"
+      expression: "oldObject==null||oldObject.spec.hubAcceptsClient==false"
+  validations:
+    - expression: "authorizer.requestResource.subresource('accept').check('update').allowed()"
+      message: "missing accepet permission"
+
+---
+
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: "mc-policy-binding"
+spec:
+  policyName: "mc-policy.open-cluster-management.io"
+  validationActions:
+    - Deny
+ 
