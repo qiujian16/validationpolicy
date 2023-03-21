@@ -1,0 +1,31 @@
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "mc-join-policy.open-cluster-management.io"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   ["cluster.open-cluster-management.io"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["managedclusters"]
+  matchConditions:
+    - name: "clusterset-label"
+      expression: "(oldObject!=null&&oldObject.metadata.labels['cluster.open-cluster-management.io/clusterset']!=object.metadata.labels['cluster.open-cluster-management.io/clusterset'])||(has(object.metadata.labels)&&object.metadata.labels['cluster.open-cluster-management.io/clusterset'].size()>0)"
+  validations:
+    - expression: "oldObject!=null&&oldObject.metadata.labels['cluster.open-cluster-management.io/clusterset'].size()>0?authorizer.group('cluster.open-cluster-management.io').resource('managedclustersets').name(oldObject.metadata.labels['cluster.open-cluster-management.io/clusterset']).subresource('join').check('create').allowed():true"
+      message: "missing disjoin permission"
+    - expression: "object.metadata.labels['cluster.open-cluster-management.io/clusterset'].size()>0?authorizer.group('cluster.open-cluster-management.io').resource('managedclustersets').name(object.metadata.labels['cluster.open-cluster-management.io/clusterset']).subresource('join').check('create').allowed():true"
+      message: "missing join permission"
+
+---
+
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: "join-policy-binding"
+spec:
+  policyName: "mc-join-policy.open-cluster-management.io"
+  validationActions:
+    - Deny
