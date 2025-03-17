@@ -5,13 +5,12 @@ metadata:
 rules:
 - apiGroups: [""]
   resources:
-  - "*"
+  - users
   verbs:
-  - actas
+  - impersonate
 - apiGroups: [""]
   resources:
     - pods
     - services
   verbs:
-    - get
-    - list
+    - impersonate-on
